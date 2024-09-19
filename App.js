@@ -1,29 +1,35 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Image, ScrollView,Button } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, Image, ScrollView,FlatList } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-// const coursesData = [
-//   { id: '1', title: 'Product Design', author: 'Dennis Sweeney', price: '$190', rating: '4.5', lessons: '12 lessons', image: require('./assets/image/ProductDesign.jpg') 
-//   },
-//   { id: '2', title: 'Website Design', author: 'Ramono Wultschner', price: '$59', rating: '4.5', lessons: '12 lessons', image: require('./assets/image/WebsiteDesign.jpg') 
-//   },
-//   { id: '3', title: 'Mobile UI Design', author: 'Ramono Wultschner', price: '$320', rating: '4.5', lessons: '12 lessons', image: require('./assets/image/MobileUI_Design.jpg') 
-//   },
-//   { id: '4', title: 'Digital Portrait', author: 'Ramono Wultschner', price: '$67', rating: '4.5', lessons: '12 lessons', image: require('./assets/image/digital_Portrait.jpg') 
-//   }
-// ];
+const phonesData = [
+  { id: '1', image: require('./assets/image/vs_silver.png'), title: 'Điện Thoại Vsmart Joy 3 \n- Hàng chính hãng', color: 'Hồng', price: '$1790001', supplierName: 'Tiki Tradding' 
+  },
+  { id: '2', image: require('./assets/image/vs_red.png'),  title: 'Điện Thoại Vsmart Joy 3 \n- Hàng chính hãng', color: 'Đỏ', price: '$1790002', supplierName: 'Tiki Tradding'
+  },
+  { id: '3', image: require('./assets/image/vs_black.png'), title: 'Điện Thoại Vsmart Joy 3 \n- Hàng chính hãng', color: 'Đen', price: '$1790003', supplierName: 'Tiki Tradding'
+  },
+  { id: '4', image: require('./assets/image/vs_blue.png'), title: 'Điện Thoại Vsmart Joy 3 \n- Hàng chính hãng', color: 'Xanh', price: '$1790004', supplierName: 'Tiki Tradding'
+  }
+];
 
-function PhoneDetailScreen() {
+function PhoneDetailScreen({route, navigation}) {
+  // Dữ liệu điện thoại đã chọn được truyền từ SelectionColorScreen
+  const { SelectPhones } = route.params || {}; // Trường hợp không có selectedPhone thì giữ nguyên
+
+  // Lấy dữ liệu của điện thoại từ phonesData dựa trên màu đã chọn
+  const phoneDetail = phonesData.find(phone => phone.color === SelectPhones) || phonesData[0]; // Nếu không có chọn thì mặc định là điện thoại đầu tiên
+
   return (
     <ScrollView style={styles.container}>
       <Image
-        source={require('./assets/image/DefaultPhone.png')} // Thay đổi URL này với URL hình ảnh thực tế
+        source={phoneDetail.image} // Thay đổi URL này với URL hình ảnh thực tế
         style={styles.productImage}
       />
       <View style={styles.detailContainer}>
-        <Text style={styles.productTitle}>Điện Thoại Vsmart Joy 3 - Hàng chính hãng</Text>
-        <Text style={styles.productPrice}>1.790.000 đ</Text>
+        <Text style={styles.productTitle}>{phoneDetail.title}</Text>
+        <Text style={styles.productPrice}>{phoneDetail.price}</Text>
         <Text style={styles.originalPrice}>1.990.000 đ</Text>
         <View style={styles.ratingContainer}>
           <Text style={styles.ratingText}>★★★★★</Text>
@@ -31,7 +37,7 @@ function PhoneDetailScreen() {
         </View>
         <Text style={styles.promotion}>Giảm giá khi thanh toán qua VietQR</Text>
         <TouchableOpacity style={styles.colorButton} 
-                          onPress={() => navigation.navigate('SelectionColorScreen')}>
+                          onPress={() => navigation.navigate('Selection Color')}>
   <Text style={styles.colorButtonText}>4 MÀU - CHỌN MÀU</Text>
   <Text style={styles.colorButtonArrow}>></Text>
 </TouchableOpacity>
@@ -44,54 +50,80 @@ function PhoneDetailScreen() {
   );
 }
 
-function SelectionColorScreen() {
+function SelectionColorScreen({navigation}) {
+  const [SelectPhones,setPhones] = useState('Xanh');
+
+  const filterPhone = () =>{
+    return phonesData.filter(phone => phone.color === SelectPhones);
+  }
+
   return (
     <ScrollView style = {stylesColorScreen.container}>
-      <View style={stylesColorScreen.DetailPhoneView}>
-      <Image 
-        source = {require('./assets/image/DefaultPhone.png')}
-        style={stylesColorScreen.phoneImage}
-      />
-
-        <Text style = {stylesColorScreen.TextDefault}>
-          Điện thoại Vsmart Joy 3 Hàng chính hãng
-        </Text>
-      </View>
+      <FlatList
+          data={filterPhone()} 
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+             <View style={stylesColorScreen.DetailPhoneView}>
+                <Image 
+                  source = {item.image}
+                  style={stylesColorScreen.phoneImage}
+                />
+                <View style={stylesColorScreen.DetailPhoneText}>
+                  <Text style = {stylesColorScreen.TextDefault}>
+                    {item.title}
+                  </Text>
+                  <Text style = {stylesColorScreen.TextDefault}>
+                    Màu: {item.color}
+                  </Text>
+                  <Text style = {stylesColorScreen.TextDefault}>
+                    Cung cấp bởi {item.supplierName}
+                  </Text>
+                  <Text style = {stylesColorScreen.TextDefault}>
+                    Giá: {item.price}
+                  </Text>
+                </View> 
+             </View>
+          )}
+        />
 
       <View style={stylesColorScreen.SelectionColor}>
         <Text>
           Chọn một màu bên dưới:
         </Text>
 
-        <TouchableOpacity>
+        <TouchableOpacity onPress = { () => setPhones('Hồng')}>
           <Image 
         source = {require('./assets/image/Blue1.png')}
         style={stylesColorScreen.ColorImage}
       />
         </TouchableOpacity>
 
-        <TouchableOpacity>
+        <TouchableOpacity onPress = { () => setPhones('Đỏ')}>
           <Image 
         source = {require('./assets/image/Red.png')}
         style={stylesColorScreen.ColorImage}
       />
         </TouchableOpacity>
 
-        <TouchableOpacity>
+        <TouchableOpacity onPress = { () => setPhones('Đen')}>
           <Image 
         source = {require('./assets/image/Black.png')}
         style={stylesColorScreen.ColorImage}
       />
         </TouchableOpacity>
 
-        <TouchableOpacity>
+        <TouchableOpacity onPress = { () => setPhones('Xanh')}>
           <Image 
         source = {require('./assets/image/Blue2.png')}
         style={stylesColorScreen.ColorImage}
       />
         </TouchableOpacity>
 
-      <TouchableOpacity style ={stylesColorScreen.submitButton}>
+      <TouchableOpacity style ={stylesColorScreen.submitButton} 
+         onPress={() => {
+            // Truyền dữ liệu về màn hình Phone Detail khi nhấn XONG
+            navigation.navigate('Phone Detail', { SelectPhones });
+          }}>
         <Text style ={stylesColorScreen.submitText}>
           XONG
         </Text>
@@ -110,7 +142,7 @@ export default function App() {
 
   return (
      <NavigationContainer>
-      <Stack.Navigator initialRouteName="Home">
+      <Stack.Navigator initialRouteName="Phone Detail">
       <Stack.Screen name="Phone Detail" component={PhoneDetailScreen} />
       <Stack.Screen name="Selection Color" component={SelectionColorScreen} />
       </Stack.Navigator>
@@ -221,8 +253,13 @@ const stylesColorScreen = StyleSheet.create({
       height: 110,
     },
 
+    DetailPhoneText: {
+      padding: 20,
+      flexDirection: 'column',
+    },
+
     TextDefault:{
-      padding: 10,
+      // padding: 20,
       fontWeight: 600,
       fontSize: 16,
     },
@@ -236,8 +273,8 @@ const stylesColorScreen = StyleSheet.create({
     },
 
     ColorImage:{
-      width: 60,
-      height: 60, 
+      width: 80,
+      height: 80, 
       margin: 5     
     },
 
@@ -245,8 +282,9 @@ const stylesColorScreen = StyleSheet.create({
       backgroundColor: '#6699FF',
       margin:10,
       paddingLeft: 50,
-      paddingRight: 50
-
+      paddingRight: 50,
+      paddingTop: 10,
+      paddingBottom: 10
     },
 
     submitText:{
